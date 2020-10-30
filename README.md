@@ -7,6 +7,7 @@ __runtime_typing__ is a python module to be used for the easy implementation of 
 ```python3
 from runtime_typing import typed
 
+
 @typed
 def expect_int(x: int):
      pass
@@ -20,7 +21,8 @@ RuntimeTypingError: TypingViolation in function `expect_int`: Expected type of a
 ## Return values are also validated
 ```python3
 from typing import Any
-from src import typed
+
+from runtime_typing import typed
 
 
 @typed
@@ -92,6 +94,7 @@ By default, `@typed` raises on the first violation. This behavior can be changed
 
 ```python3
 from runtime_typing import typed
+
 
 @typed(defer=True)
 def return_int(x: int) -> int:
