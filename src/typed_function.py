@@ -75,17 +75,23 @@ class TypedFunction:
                 condition=get_type_hints(self.func)["return"],
             )
 
-        return result
+        self.result = result
+
+        return self.result
 
     def handle_violations(self) -> List[TypingViolation]:
         message = "\n    + " + "\n    + ".join(
             [violation.message for violation in self.violations]
         )
 
-        if self.mode == "raise":
-            raise RuntimeTypingError(message)
-        if self.mode == "warn":
-            warn(RuntimeTypingWarning, message)
+        if self.violations:
+            if self.mode == "raise":
+                raise RuntimeTypingError(message)
+
+            if self.mode == "warn":
+                warn(message, RuntimeTypingWarning)
+
+        return self.violations
 
     def validate_entity(
         self, parameter: "Parameter", condition: _GenericAlias

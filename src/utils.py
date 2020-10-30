@@ -74,7 +74,7 @@ def valid_args_from_literal(annotation: _GenericAlias) -> Set[Any]:
 
 
 def get_root(annotation: _GenericAlias) -> Union[type, Any, TypeVar]:
-    """Modifying typing.get_origin to also identify TypeVar and Any."""
+    """Wrapper around typing.get_origin to also identify TypeVar and Any."""
     origin = get_origin(annotation)
     if origin:
         return origin
