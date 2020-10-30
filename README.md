@@ -42,6 +42,7 @@ RuntimeTypingError: TypingViolation in function `return_int`: Expected type of a
 The following types and `typing`-constructs are covered:
 
 + primitives (python builtin-types, custom classes)
++ `typing.Any`
 + `typing.AnyStr`
 + `typing.Callable`
 + `typing.Dict`
