@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, List, Literal, Optional, Union
+from typing import Any, List, Literal, Optional
 from warnings import warn
 
 
@@ -59,7 +59,7 @@ class ComplexTypingViolation(TypingViolation):
     ):
         self.violations = violations
 
-        super().__init__(mode, defer)
+        super().__init__(mode=mode, defer=defer)
 
     @property
     def message(self) -> str:
