@@ -15,8 +15,6 @@ HandleViolationMode = Literal["raise", "warn", "return"]
 
 
 class TypingViolation(ABC):
-    mode = "raise"
-
     def __init__(self, mode: "HandleViolationMode", defer: bool):
         self.mode = mode
         if not defer:
@@ -84,30 +82,6 @@ class ComplexTypingViolation(TypingViolation):
             return self
 
 
-def UnionTypingViolation(
-    violations: List["SimpleTypingViolation"],
-    mode: "HandleViolationMode",
-    defer: bool,
-) -> "SimpleTypingViolation":
-    obj = unique_element(list(map(lambda v: v.obj, violations)))
-    breakpoint()
-    got = unique_element(list(map(lambda v: v.got, violations)))
-    item_type = unique_element(list(map(lambda v: v.category, violations)))
-    item = unique_element(list(map(lambda v: v.parameter_name, violations)))
-
-    expected = [f"`{v.expected}`" for v in violations]
-
-    return SimpleTypingViolation(
-        obj=obj,
-        category=item_type,
-        parameter_name=item,
-        expected=expected,
-        got=got,
-        mode=mode,
-        defer=defer,
-    )
-
-
 class SimpleTypingViolation(TypingViolation):
     def __init__(
         self,
@@ -124,10 +98,7 @@ class SimpleTypingViolation(TypingViolation):
         self.parameter_name = parameter_name
         self.expected = expected
         self.got = got
-        self.mode = mode
-
-        if not defer:
-            self.handle()
+        super().__init__(mode=mode, defer=defer)
 
     def __add__(self, other: Optional["TypingViolation"]) -> "TypingViolation":
         if other is None:
