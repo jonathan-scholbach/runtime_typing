@@ -42,24 +42,6 @@ def contains(iterable: Iterable, val: Any) -> bool:
         return False
 
 
-def __default_values_to_kwargs(func, kwargs: dict) -> dict:
-    for name, parameter in signature(func).parameters.items():
-        if parameter.default is not _empty:
-            if name not in kwargs:
-                kwargs[name] = parameter.default
-
-    return kwargs
-
-
-def assemble_kwargs(func: Callable, *args: list, **kwargs: dict) -> dict:
-    args_dict = {
-        list(signature(func).parameters.keys())[i]: arg
-        for i, arg in enumerate(args)
-    }
-
-    return __default_values_to_kwargs(func=func, kwargs={**args_dict, **kwargs})
-
-
 def valid_args_from_literal(annotation: _GenericAlias) -> Set[Any]:
     args = get_args(annotation)
     valid_values = []
