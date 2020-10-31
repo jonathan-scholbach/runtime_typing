@@ -37,5 +37,3 @@ class TestMode(TestCase):
     def test_expect_str_raise_mode(self):
         with self.assertRaises(RuntimeTypingError):
             expect_str_raise_mode(1)
-
-    raise TypeError
