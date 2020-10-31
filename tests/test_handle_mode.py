@@ -38,4 +38,4 @@ class TestMode(TestCase):
         with self.assertRaises(RuntimeTypingError):
             expect_str_raise_mode(1)
 
-    raise ValueError
+    raise TypeError
