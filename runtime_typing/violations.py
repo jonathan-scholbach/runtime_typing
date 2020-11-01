@@ -14,26 +14,58 @@ class RuntimeTypingWarning(Warning):
 HandleViolationMode = Literal["raise", "warn", "return"]
 
 
-class TypingViolation(ABC):
+class RuntimeTypingViolation(ABC):
+    """Abstract Base Class of Violations of Typing Constraints.
+
+    Attributes
+    ----------
+
+    obj
+        The object the violation occurred on.
+
+    parameter_name
+        The name of the parameter the violation occurred on.
+
+    expected
+        The expected value (or type) of the parameter.
+
+    got
+        The actual value (or type) of the parameter.
+
+    message
+        A human-readable message describing the violation. This is used in RuntimeTypingViolation.handle() when raising or warning.
+
+    mode
+        How the violation behaves when it is handled.
+    """
+
     def __init__(self, mode: "HandleViolationMode", defer: bool):
         self.mode = mode
         if not defer:
             self.handle()
 
     @abstractmethod
-    def __add__(self, other: "TypingViolation"):
+    def __add__(self, other: "RuntimeTypingViolation"):
         pass
 
     def __radd__(
-        self, other: Optional["TypingViolation"] = None
-    ) -> "TypingViolation":
+        self, other: Optional["RuntimeTypingViolation"] = None
+    ) -> "RuntimeTypingViolation":
         if other is None:
             return self
 
     def __repr__(self):
         return self.message
 
-    def handle(self, mode: Optional[HandleViolationMode] = None):
+    def handle(self, mode: Optional[Literal["raise", "warn", "return"]] = None):
+        """Handle the violation (i.e. raise, warn or return it).
+
+        Parameters
+        ----------
+
+        mode
+            How to handle the violation. If set, overrides the `mode` attribute of the violation.
+        """
         mode = mode or self.mode
 
         if mode == "raise":
@@ -50,10 +82,10 @@ class TypingViolation(ABC):
         pass
 
 
-class ComplexTypingViolation(TypingViolation):
+class ComplexRuntimeTypingViolation(RuntimeTypingViolation):
     def __init__(
         self,
-        violations: List["SimpleTypingViolation"],
+        violations: List["SimpleRuntimeTypingViolation"],
         mode: "HandleViolationMode" = "raise",
         defer: bool = False,
     ):
@@ -69,20 +101,22 @@ class ComplexTypingViolation(TypingViolation):
         return f"ComplexTypingViolation: {violations_messages}."
 
     def __add__(
-        self, other: Optional["TypingViolation"] = None
-    ) -> "ComplexTypingViolation":
-        if isinstance(other, ComplexTypingViolation):
-            return ComplexTypingViolation(
+        self, other: Optional["RuntimeTypingViolation"] = None
+    ) -> "ComplexRuntimeTypingViolation":
+        if isinstance(other, ComplexRuntimeTypingViolation):
+            return ComplexRuntimeTypingViolation(
                 violations=self.violations + other.violations
             )
-        if isinstance(other, SimpleTypingViolation):
-            return ComplexTypingViolation(violations=self.violations + [other])
+        if isinstance(other, SimpleRuntimeTypingViolation):
+            return ComplexRuntimeTypingViolation(
+                violations=self.violations + [other]
+            )
 
         if other is None:
             return self
 
 
-class SimpleTypingViolation(TypingViolation):
+class SimpleRuntimeTypingViolation(RuntimeTypingViolation):
     def __init__(
         self,
         obj: object,
@@ -100,14 +134,16 @@ class SimpleTypingViolation(TypingViolation):
         self.got = got
         super().__init__(mode=mode, defer=defer)
 
-    def __add__(self, other: Optional["TypingViolation"]) -> "TypingViolation":
+    def __add__(
+        self, other: Optional["RuntimeTypingViolation"]
+    ) -> "RuntimeTypingViolation":
         if other is None:
             return self
 
-        if isinstance(other, ComplexTypingViolation):
+        if isinstance(other, ComplexRuntimeTypingViolation):
             return other + self
 
-        return ComplexTypingViolation(violations=[self, other])
+        return ComplexRuntimeTypingViolation(violations=[self, other])
 
     @property
     def message(self):

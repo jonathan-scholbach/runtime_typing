@@ -1,7 +1,7 @@
 from typing import Optional
 from unittest import TestCase
 
-from src import typed
+from runtime_typing import typed
 
 
 @typed

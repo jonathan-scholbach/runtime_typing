@@ -1,7 +1,7 @@
 from typing import Tuple, TypeVar
 from unittest import TestCase
 
-from src import typed, RuntimeTypingError
+from runtime_typing import typed, RuntimeTypingError
 
 
 T = TypeVar("T")

@@ -1,7 +1,7 @@
 from unittest import TestCase
 from typing import Literal, Union, TypeVar
 
-from src import typed, RuntimeTypingError
+from runtime_typing import typed, RuntimeTypingError
 
 
 T = TypeVar("T")

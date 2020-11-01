@@ -1,12 +1,13 @@
 from unittest import TestCase
 from typing import Union, Tuple, TypeVar
 
-from src import typed
-from src.violations import RuntimeTypingError
+from runtime_typing import typed
+from runtime_typing.violations import RuntimeTypingError
 
 
 T = TypeVar("T")
 S = TypeVar("")
+
 
 @typed
 def expect_union_with_deep_type_var_as_second_option(x: Union[str, T], y: T):
@@ -36,7 +37,7 @@ def expect_and_return_type_var(x: T, fail: bool = False) -> T:
         else:
             return str(x)
 
-    return x*5
+    return x * 5
 
 
 class TestDeepTypeVar(TestCase):

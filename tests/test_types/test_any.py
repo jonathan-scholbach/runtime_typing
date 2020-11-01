@@ -1,8 +1,8 @@
 from unittest import TestCase
 from typing import Any
 
-from src import typed
-from src.violations import RuntimeTypingError
+from runtime_typing import typed
+from runtime_typing.violations import RuntimeTypingError
 
 
 @typed

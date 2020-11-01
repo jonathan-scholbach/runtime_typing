@@ -14,15 +14,20 @@ from typing import (
 )
 from warnings import warn
 
-from src.violations import (
-    SimpleTypingViolation,
-    ComplexTypingViolation,
-    TypingViolation,
+from runtime_typing.violations import (
+    SimpleRuntimeTypingViolation,
+    ComplexRuntimeTypingViolation,
+    RuntimeTypingViolation,
     HandleViolationMode,
     RuntimeTypingError,
     RuntimeTypingWarning,
 )
-from src.utils import contains, get_root, valid_args_from_literal, Parameter
+from runtime_typing.utils import (
+    contains,
+    get_root,
+    valid_args_from_literal,
+    Parameter,
+)
 
 
 ReturnType = TypeVar("ReturnType")
@@ -79,7 +84,7 @@ class TypedFunction:
 
         return self.result
 
-    def handle_violations(self) -> List[TypingViolation]:
+    def handle_violations(self) -> List[RuntimeTypingViolation]:
         message = "\n    + " + "\n    + ".join(
             [violation.message for violation in self.violations]
         )
@@ -95,7 +100,7 @@ class TypedFunction:
 
     def validate_entity(
         self, parameter: "Parameter", condition: _GenericAlias
-    ) -> "TypingViolation":
+    ) -> "RuntimeTypingViolation":
         """Check whether entity of `name` and `val` violates condition,
         recursively walking through nested condition."""
         root = get_root(condition)
@@ -130,7 +135,7 @@ class TypedFunction:
         self, expected: Any, got: Any, category: str, parameter_name: str
     ) -> None:
         self.violations.append(
-            SimpleTypingViolation(
+            SimpleRuntimeTypingViolation(
                 obj=self.func,
                 expected=expected,
                 got=got,
@@ -312,7 +317,7 @@ class TypedFunction:
 
         if union_violations:
             self.violations.append(
-                ComplexTypingViolation(
+                ComplexRuntimeTypingViolation(
                     violations=union_violations,
                     mode=self.mode,
                     defer=self.defer,
@@ -434,7 +439,7 @@ class TypedFunction:
 
             if aux.violations:
                 self.violations.append(
-                    ComplexTypingViolation(
+                    ComplexRuntimeTypingViolation(
                         aux.violations, mode=self.mode, defer=self.defer
                     )
                 )

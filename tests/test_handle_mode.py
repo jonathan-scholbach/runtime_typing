@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from src import typed, RuntimeTypingError, RuntimeTypingWarning
+from runtime_typing import typed, RuntimeTypingError, RuntimeTypingWarning
 
 
 @typed("return")
