@@ -1,11 +1,9 @@
 from collections import namedtuple
-from inspect import _empty, signature
 from functools import wraps
 from typing import (
     get_args,
     get_origin,
     Any,
-    Callable,
     _GenericAlias,
     Iterable,
     Literal,
