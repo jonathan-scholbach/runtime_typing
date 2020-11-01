@@ -15,9 +15,9 @@ from typing import (
 from warnings import warn
 
 from runtime_typing.violations import (
-    SimpleRuntimeTypingViolation,
-    ComplexRuntimeTypingViolation,
     RuntimeTypingViolation,
+    ComplexRuntimeTypingViolation,
+    RuntimeTypingViolationBase,
     HandleViolationMode,
     RuntimeTypingError,
     RuntimeTypingWarning,
@@ -51,7 +51,7 @@ class TypedFunction:
         self.violations = []
         self.return_value = None
 
-    def execute(self) -> Union[Any, Tuple[Any, List[RuntimeTypingViolation]]]:
+    def execute(self) -> Union[Any, Tuple[Any, List[RuntimeTypingViolationBase]]]:
         for arg_name, condition in get_type_hints(self.func).items():
             if arg_name == "return":
                 continue
@@ -84,7 +84,7 @@ class TypedFunction:
 
         return self.result
 
-    def handle_violations(self) -> List[RuntimeTypingViolation]:
+    def handle_violations(self) -> List[RuntimeTypingViolationBase]:
         message = "\n    + " + "\n    + ".join(
             [violation.message for violation in self.violations]
         )
@@ -100,7 +100,7 @@ class TypedFunction:
 
     def validate_entity(
         self, parameter: "Parameter", condition: _GenericAlias
-    ) -> "RuntimeTypingViolation":
+    ) -> "RuntimeTypingViolationBase":
         """Check whether entity of `name` and `val` violates condition,
         recursively walking through nested condition."""
         root = get_root(condition)
@@ -135,7 +135,7 @@ class TypedFunction:
         self, expected: Any, got: Any, category: str, parameter_name: str
     ) -> None:
         self.violations.append(
-            SimpleRuntimeTypingViolation(
+            RuntimeTypingViolation(
                 obj=self.func,
                 expected=expected,
                 got=got,

@@ -1,4 +1,5 @@
 from collections import namedtuple
+from inspect import isfunction, isclass, getmembers
 from functools import wraps
 from typing import (
     get_args,
@@ -16,18 +17,37 @@ from typing import (
 Parameter = namedtuple("Parameter", "value name")
 
 
-def doublewrap(f):
-    """This recipe of creating a decorator with optional parameters is taken
-    from https://stackoverflow.com/a/14412901/3566606."""
+def class_decorator(cls, decorator, *args, **kwargs):
+    """Class decorator decorating all methods (and inner classes) with decorator."""
+    instance_methods = getmembers(cls, predicate=isfunction)
+    subclasses = getmembers(cls, predicate=isclass)
 
-    @wraps(f)
-    def new_dec(*args, **kwargs):
+    for name, obj in instance_methods + subclasses:
+        if name == "__class__":
+            continue
+        setattr(cls, name, decorator(obj, *args, **kwargs))
+
+    return cls
+
+
+def optional_arguments_to_decorator(decorator):
+    """Make decorator accept optional arguments and classes as objects."""
+
+    @wraps(decorator)
+    def new_decorator(*args, **kwargs):
         if len(args) == 1 and len(kwargs) == 0 and callable(args[0]):
-            return f(args[0])
+            if isfunction(args[0]):
+                return decorator(args[0])
+            if isclass(args[0]):
+                return class_decorator(args[0], decorator)
         else:
-            return lambda realf: f(realf, *args, **kwargs)
+            return (
+                lambda obj: decorator(obj, *args, **kwargs)
+                if isfunction(obj)
+                else class_decorator(obj, decorator, *args, **kwargs)
+            )
 
-    return new_dec
+    return new_decorator
 
 
 def contains(iterable: Iterable, val: Any) -> bool:
