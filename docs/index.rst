@@ -1,9 +1,11 @@
 `runtime_typing`
 ==========================================
-`runtime_typing` is a module for runtime validating function arguments and
-return values against constraints defined by type annotation using
+`runtime_typing` is a python module for runtime validating function arguments
+and return values against constraints defined by type annotation using
 python's `typing <https://docs.python.org/3/library/typing.html>`_ module.
 
+The project is on
+`GitHub <https://github.com/jonathan-scholbach/runtime_typing`>_
 
 The following types and `typing`-constructs are covered:
 
