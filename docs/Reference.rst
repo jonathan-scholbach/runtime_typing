@@ -10,6 +10,7 @@ Reference
 Violations
 -----------
 .. automodule:: runtime_typing
+    :noindex:
     :members:
         RuntimeTypingViolation, ComplexRuntimeTypingViolation
 
@@ -18,4 +19,5 @@ Exceptions / Warnings
 ---------------------
 
 .. automodule:: runtime_typing
+    :noindex:
     :members: RuntimeTypingError, RuntimeTypingWarning,
