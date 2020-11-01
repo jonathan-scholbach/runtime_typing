@@ -10,7 +10,7 @@ setup(
     author="Jonathan Scholbach",
     author_email="j.scholbach@posteo.de",
     url="https://github.com/jonathan-scholbach/runtime_typing",
-    download_url="https://github.com/jonathan-scholbach/runtime_typing/v_010.tar.gz",
+    download_url="https://github.com/jonathan-scholbach/runtime_typing/v0.1-alpha.tar.gz",
     keywords=["typing", "validation", "validate"],
     install_requires=[],
     classifiers=[
