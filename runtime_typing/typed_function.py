@@ -30,13 +30,10 @@ from runtime_typing.utils import (
 )
 
 
-ReturnType = TypeVar("ReturnType")
-
-
 class TypedFunction:
     def __init__(
         self,
-        func: TypingCallable[[], "ReturnType"],
+        func: TypingCallable,
         kwargs: dict,
         mode: "HandleViolationMode",
         defer: bool,
@@ -54,7 +51,7 @@ class TypedFunction:
         self.violations = []
         self.return_value = None
 
-    def execute(self) -> "ReturnType":
+    def execute(self) -> Union[Any, Tuple[Any, List[RuntimeTypingViolation]]]:
         for arg_name, condition in get_type_hints(self.func).items():
             if arg_name == "return":
                 continue
@@ -81,6 +78,9 @@ class TypedFunction:
             )
 
         self.result = result
+
+        if self.mode == "return":
+            return self.result, self.violations
 
         return self.result
 

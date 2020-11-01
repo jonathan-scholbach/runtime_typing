@@ -3,7 +3,6 @@ runtime_typing
 ====================================
 
 Providing a function decorator to perform type checks during runtime.
-
 """
 
 from inspect import _empty, signature
@@ -50,13 +49,13 @@ def typed(
 
         return_int("This does not raise.")
 
-    .. code-block:: python3
+    .. code-block:: python
 
         ('This does not raise.', [TypingViolation in function `return_int`: Expected type of argument `x` to be `<class 'int'>` (got `<class 'str'>`)., TypingViolation in function `return_int`: Expected type of argument `return` to be `<class 'int'>` (got `<class 'str'>`).])
 
     Example
     ----------
-    .. code-block:: python3
+    .. code-block:: python
 
         @typed(defer=True)
         def return_int(x: int) -> int:
@@ -64,11 +63,11 @@ def typed(
 
         return_int("")
 
-    .. code-block:: python3
+    .. code-block:: python
 
         RuntimeTypingError:
             + TypingViolation in function `return_int`: Expected type of argument `x` to be `<class 'int'>` (got `<class 'str'>`).
-            + TypingViolation in function `return_int`: Expected type of argument `return` to be `<class 'int'>` (got `<class 'str'>`)."
+            + TypingViolation in function `return_int`: Expected type of argument `return` to be `<class 'int'>` (got `<class 'str'>`).
     """
 
     @wraps(func)
@@ -88,8 +87,7 @@ def typed(
             func=func, kwargs=kwargs, mode=mode, defer=defer
         )
         result = typed_func.execute()
-        violations = typed_func.handle_violations()
 
-        return (result, violations) if violations else result
+        return result
 
     return validated
