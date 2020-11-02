@@ -18,14 +18,9 @@ Parameter = namedtuple("Parameter", "value name")
 
 
 def class_decorator(cls, decorator, *args, **kwargs):
-    """Class decorator decorating all methods (and inner classes) with decorator."""
-    instance_methods = getmembers(cls, predicate=isfunction)
-    subclasses = getmembers(cls, predicate=isclass)
-
-    for name, obj in instance_methods + subclasses:
-        if name == "__class__":
-            continue
-        setattr(cls, name, decorator(obj, *args, **kwargs))
+    """Class decorator decorating all methods with decorator."""
+    for name, method in getmembers(cls, predicate=isfunction):
+        setattr(cls, name, decorator(method, *args, **kwargs))
 
     return cls
 
