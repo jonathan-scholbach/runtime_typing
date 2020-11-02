@@ -55,7 +55,7 @@ class RuntimeTypingViolationBase(ABC):
         if mode == "warn":
             warn(self.message, RuntimeTypingWarning)
 
-        return selfmae
+        return self
 
     @property
     @abstractmethod

@@ -105,7 +105,7 @@ def typed(
 
     Example
     -------
-    Use `@typed` on a class: Instance methods and staticmethods are typed, even if they are inherited from an un-typed class; classmethods and subclasses are not typed.
+    Use `@typed` on a class: Instance methods and staticmethods are typed, even if they are inherited from an un-typed class; classmethods and nested classes are not typed.
 
     .. code-block:: python
 
@@ -130,7 +130,7 @@ def typed(
             def some_instance_method(self, x: int):
                 pass
 
-            class SomeSubClass:
+            class SomeNestedClass:
                 def __init__(self, x: int):
                     pass
 
@@ -147,8 +147,8 @@ def typed(
     RuntimeTypingError: TypingViolation in function `some_staticmethod`: Expected type of argument `x` to be `<class 'int'>` (got `<class 'str'>`).
 
     >>> SomeClass.some_classmethod("not an int")  # does not raise
-    >>> SomeClass(1).SomeSubClass("not an int")  # does not raise
-    >>> SomeClass.SomeSubClass("not an int")  # does not raise
+    >>> SomeClass(1).SomeNestedClass("not an int")  # does not raise
+    >>> SomeClass.SomeNestedClass("not an int")  # does not raise
 
     Example
     -------
