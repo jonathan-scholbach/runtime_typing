@@ -7,7 +7,7 @@ Providing a function decorator to perform type checks during runtime.
 
 from inspect import _empty, signature
 from functools import wraps
-from typing import Callable, Literal
+from typing import Callable, Literal, Iterable, Optional
 
 from runtime_typing.typed_function import TypedFunction
 from runtime_typing.utils import optional_arguments_to_decorator
@@ -18,6 +18,8 @@ def typed(
     obj: "Callable",
     mode: Literal["raise", "warn", "return"] = "raise",
     defer: bool = False,
+    exclude: Optional[Iterable[str]] = None,
+    include: Optional[Iterable[str]] = None,
 ) -> "Callable":
     """Decorator for validating arguments against type annotations.
 
@@ -39,6 +41,13 @@ def typed(
     defer
         Whether to defer the handling of a violation. Default: `False`. By default, `@typed` handles every violation as soon as it occurs. This behavior can be changed by setting `defer` to `True`. This will gather all violations before handling them (i.e. throwing an Exception or a Warning)
 
+    include
+        Iterable of names of arguments (can also contain "return") to be taken into account for type-checking. If falsey (an empty iterable, or not provided), all type-annotated arguments of the function are taken into account (except for those listed in the `exclude` parameter).
+
+    exclude
+        Iterable of names of arguments (can also contatin "return") to be ignored during type-checking. Definitions via `exclude` prevail over those via `include`.
+
+
     Example
     -------
 
@@ -49,7 +58,6 @@ def typed(
         @typed
         def identity_of_int(x: int) -> int:
            return x
-
 
     >>> identity_of_int("not an int")
     RuntimeTypingError: TypingViolation in function `identity_of_int`: Expected type of argument `x` to be `<class 'int'>` (got `<class 'str'>`).
@@ -66,7 +74,8 @@ def typed(
 
         @typed
         def identity_of_number(x: "Union[int, float]") -> "Union[int, float]":
-           return x
+            return x
+
 
     >>> identity_of_number("not a number")
     RuntimeTypingError: TypingViolation in function `identity_of_number`: Expected type of argument `x` to be one of [<class 'int'>, <class 'float'>] (got `<class 'str'>`).
@@ -102,6 +111,45 @@ def typed(
     RuntimeTypingError:
         + TypingViolation in function `identity_of_int`: Expected type of argument `x` to be `<class 'int'>` (got `<class 'str'>`).
         + TypingViolation in function `identity_of_int`: Expected type of argument `return` to be `<class 'int'>` (got `<class 'str'>`).
+
+
+
+    Example
+    -------
+
+    Use `include` and `exclude` parameters to restrict the function-arguments which are exposed to typechecking:
+
+    No Exception is raised in the following example, because only the return value is type-checked:
+
+    .. code-block:: python
+
+        @typed(include=("return",))
+        def check_return_only(x: int) -> str:
+            return str(x)
+
+    >>> check_only("not an int")
+    "not an int"
+
+
+    Here, `x` is not typ-checked, because it is excluded:
+
+    .. code-block:: python
+
+        @typed(exclude=("x",))
+        def do_not_check_x(x: int, y: int, z: int) -> str:
+            return ", ".join([str(x), str(y), str(z)])
+
+    >>> do_not_check_x("not an int", 2, 3)
+    "not an int, 2, 3"
+
+
+    The following function is effectively not type-checked, because the included parameter `x` is also excluded. (`exclude` prevails `include`):
+
+    .. code-block:: python
+
+        @typed(exclude=("x", "y", "return"), include=("x",))
+        def effectively_check_nothing(x: int, y: float) -> str:
+            return (x, y)
 
     Example
     -------
@@ -181,7 +229,12 @@ def typed(
         kwargs = {**default_args, **given_args}
 
         typed_func = TypedFunction(
-            func=obj, kwargs=kwargs, mode=mode, defer=defer
+            func=obj,
+            kwargs=kwargs,
+            mode=mode,
+            defer=defer,
+            exclude=exclude,
+            include=include,
         )
         result = typed_func.execute()
 

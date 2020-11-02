@@ -16,8 +16,7 @@ HandleViolationMode = Literal["raise", "warn", "return"]
 
 
 class RuntimeTypingViolationBase(ABC):
-    """Abstract Base Class of Violations of Typing Constraints.
-    """
+    """Abstract Base Class of Violations of Typing Constraints."""
 
     def __init__(self, mode: "HandleViolationMode", defer: bool):
         self._mode = mode
@@ -78,6 +77,7 @@ class ComplexRuntimeTypingViolation(RuntimeTypingViolationBase):
     message
         A human-readable message used for raising and warning.
     """
+
     def __init__(
         self,
         violations: List["RuntimeTypingViolation"],
@@ -149,6 +149,7 @@ class RuntimeTypingViolation(RuntimeTypingViolationBase):
     message
         A human-readable message describing the violation. This is used in RuntimeTypingViolation.handle() when raising or warning.
     """
+
     def __init__(
         self,
         obj: object,

@@ -4,7 +4,9 @@ from typing import (
     get_type_hints,
     Any,
     Callable as TypingCallable,
+    Dict,
     _GenericAlias,
+    Iterable as TypingIterable,
     List,
     Literal,
     Optional,
@@ -37,22 +39,45 @@ class TypedFunction:
         kwargs: dict,
         mode: "HandleViolationMode",
         defer: bool,
+        exclude: Optional[TypingIterable[str]] = None,
+        include: Optional[TypingIterable[str]] = None,
         type_var_registry: Optional[dict] = None,
     ) -> None:
         self.func = func
         self.kwargs = kwargs
         self.mode = mode
         self.defer = defer
-        if type_var_registry is None:
-            self.type_var_registry = {}
-        else:
-            self.type_var_registry = type_var_registry
+        self.type_var_registry = type_var_registry or {}
+        self.exclude = set(exclude) if exclude else set()
+        self.include = set(include) if include else set()
 
         self.violations = []
         self.return_value = None
 
-    def execute(self) -> Union[Any, Tuple[Any, List[RuntimeTypingViolationBase]]]:
-        for arg_name, condition in get_type_hints(self.func).items():
+    @property
+    def annotated_arguments(self) -> Dict[str, _GenericAlias]:
+        return get_type_hints(self.func)
+
+    @property
+    def typed_arguments(self) -> Dict[str, _GenericAlias]:
+        include = (
+            self.annotated_arguments.keys()
+            if not self.include
+            else self.include
+        ) - self.exclude
+
+        return dict(
+            filter(
+                lambda item: item[0] in include,
+                self.annotated_arguments.items(),
+            )
+        )
+
+    def execute(
+        self,
+    ) -> Union[Any, Tuple[Any, List[RuntimeTypingViolationBase]]]:
+
+        for arg_name, condition in self.typed_arguments.items():
             if arg_name == "return":
                 continue
 
@@ -71,7 +96,7 @@ class TypedFunction:
 
         result = self.func(**self.kwargs)
 
-        if "return" in get_type_hints(self.func):
+        if "return" in self.typed_arguments:
             self.validate_entity(
                 parameter=Parameter(value=result, name="return"),
                 condition=get_type_hints(self.func)["return"],
@@ -85,11 +110,11 @@ class TypedFunction:
         return self.result
 
     def handle_violations(self) -> List[RuntimeTypingViolationBase]:
-        message = "\n    + " + "\n    + ".join(
-            [violation.message for violation in self.violations]
-        )
-
         if self.violations:
+            message = "\n    + " + "\n    + ".join(
+                [violation.message for violation in self.violations]
+            )
+
             if self.mode == "raise":
                 raise RuntimeTypingError(message)
 
@@ -182,12 +207,12 @@ class TypedFunction:
         parameter: "Parameter",
         condition: _GenericAlias,
     ) -> None:
+        cond = condition
         if condition in self.type_var_registry:
             expected_type = self.type_var_registry[condition]
         else:
             expected_type = type(parameter.value)
-
-        self.type_var_registry[condition] = type(parameter.value)
+            self.type_var_registry[condition] = type(parameter.value)
 
         self.__validate_primitive(
             parameter=parameter,
@@ -311,6 +336,7 @@ class TypedFunction:
                 )
 
             if not aux.violations:
+                self.type_var_registry.update(aux.type_var_registry)
                 return
 
             union_violations += aux.violations
