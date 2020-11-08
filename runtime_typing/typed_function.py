@@ -73,10 +73,9 @@ class TypedFunction:
             )
         )
 
-    def execute(
-        self,
+    def __call__(
+        self
     ) -> Union[Any, Tuple[Any, List[RuntimeTypingViolationBase]]]:
-
         for arg_name, condition in self.typed_arguments.items():
             if arg_name == "return":
                 continue

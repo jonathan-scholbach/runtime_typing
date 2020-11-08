@@ -236,7 +236,7 @@ def typed(
             exclude=exclude,
             include=include,
         )
-        result = typed_func.execute()
+        result = typed_func()
 
         return result
 
