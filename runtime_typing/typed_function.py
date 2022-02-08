@@ -12,6 +12,7 @@ from typing import (
     Optional,
     Tuple,
     TypeVar,
+    TypedDict,
     Union,
 )
 from warnings import warn
@@ -74,7 +75,7 @@ class TypedFunction:
         )
 
     def __call__(
-        self
+        self,
     ) -> Union[Any, Tuple[Any, List[RuntimeTypingViolationBase]]]:
         for arg_name, condition in self.typed_arguments.items():
             if arg_name == "return":
@@ -123,7 +124,9 @@ class TypedFunction:
         return self.violations
 
     def validate_entity(
-        self, parameter: "Parameter", condition: _GenericAlias
+        self,
+        parameter: "Parameter",
+        condition: _GenericAlias,
     ) -> "RuntimeTypingViolationBase":
         """Check whether entity of `name` and `val` violates condition,
         recursively walking through nested condition."""
@@ -137,6 +140,7 @@ class TypedFunction:
                 Literal: self.__validate_literal,
                 Callable: self.__validate_callable,
                 Iterable: self.__validate_iterable,
+                TypedDict: self.__validate_typed_dict,
                 TypeVar: self.__validate_type_var,
                 type: self.__validate_type,
                 dict: self.__validate_dict,
@@ -192,7 +196,6 @@ class TypedFunction:
                     category="type of argument",
                     parameter_name=parameter.name,
                 )
-
         if not isinstance(parameter.value, expected_type):
             self.__add_violation(
                 expected=expected_type,
@@ -218,6 +221,36 @@ class TypedFunction:
             expected_type=expected_type,
             constraints=condition.__constraints__,
         )
+
+    def __validate_typed_dict(
+        self,
+        parameter: "Parameter",
+        condition: _GenericAlias,
+    ) -> None:
+        if not isinstance(parameter.value, dict):
+            self.__add_violation(
+                expected=dict,
+                got=type(parameter.value),
+                parameter_name=parameter.name,
+                category="type of argument",
+            )
+        for expected_key, expected_type in get_type_hints(condition).items():
+            if not expected_key in parameter.value:
+                self.__add_violation(
+                    expected=expected_key,
+                    got=None,
+                    parameter_name=parameter.name,
+                    category="key in TypedDict",
+                )
+                continue
+
+            self.validate_entity(
+                Parameter(
+                    parameter.value[expected_key],
+                    f"{parameter.name}.{expected_key}",
+                ),
+                expected_type,
+            )
 
     def __validate_sequence(
         self,

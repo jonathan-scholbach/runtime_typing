@@ -1,3 +1,5 @@
+import sys
+
 from collections import namedtuple
 from inspect import isfunction, isclass, getmembers
 from functools import wraps
@@ -10,6 +12,7 @@ from typing import (
     Literal,
     Set,
     Union,
+    TypedDict,
     TypeVar,
 )
 
@@ -77,5 +80,20 @@ def get_root(annotation: _GenericAlias) -> Union[type, Any, TypeVar]:
     if type(annotation) is TypeVar:
         return TypeVar
 
+    if version_safe_is_typeddict(annotation):
+        return TypedDict
+
     if annotation is Any:
         return Any
+
+
+def version_safe_is_typeddict(value: Any) -> bool:
+    if sys.version_info < (3, 10):
+        from typing import _TypedDictMeta
+
+        return isinstance(value, _TypedDictMeta)
+
+    from typing import is_typeddict
+
+    # Second check is necessary, is_typeddict(TypedDict) is surprisingly False
+    return is_typeddict(value) or value is TypedDict
