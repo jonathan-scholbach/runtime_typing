@@ -19,6 +19,7 @@ The following types and `typing`-constructs are covered:
 + `typing.Optional`
 + `typing.Tuple`
 + `typing.Type`
++ `typing.TypedDict`
 + `typing.TypeVar`
 + `typing.Union`
 
